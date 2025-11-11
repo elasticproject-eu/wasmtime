@@ -17,6 +17,15 @@ use core::{future::Future, pin::Pin};
 use wasmtime_environ::PrimaryMap;
 use wasmtime_environ::component::{NameMap, NameMapIntern};
 
+#[cfg(feature = "caller")]
+#[derive(Debug)]
+/// Used as a type for passing the caller_instance through the host function closures
+/// See [`LinkerInstance::func_wrap_with_caller`]
+pub struct CallerInstance {
+    pub(crate) instance: Instance,
+    pub(crate) caller: u32,
+}
+
 /// A type used to instantiate [`Component`]s.
 ///
 /// This type is used to both link components together as well as supply host
@@ -489,6 +498,50 @@ impl<T: 'static> LinkerInstance<'_, T> {
             store.block_on(|store| f(store, params).into())?
         };
         self.func_wrap(name, ff)
+    }
+
+    #[cfg(feature = "caller")]
+    /// Same as [`Self::func_wrap`] but the generic function type takes an additional parameter for the caller instance
+    pub fn func_wrap_with_caller<F, Params, Return>(&mut self, name: &str, func: F) -> Result<()>
+    where
+        F: Fn(StoreContextMut<T>, CallerInstance, Params) -> Result<Return> + Send + Sync + 'static,
+        Params: ComponentNamedList + Lift + 'static,
+        Return: ComponentNamedList + Lower + 'static,
+    {
+        self.insert(
+            name,
+            Definition::Func(HostFunc::from_closure_with_caller(func)),
+        )?;
+        Ok(())
+    }
+
+    #[cfg(feature = "caller")]
+    #[cfg(feature = "async")]
+    /// Same as [`Self::func_wrap_async`] but the generic function type takes an additional parameter for the caller instance
+    pub fn func_wrap_with_caller_async<Params, Return, F>(&mut self, name: &str, f: F) -> Result<()>
+    where
+        F: Fn(
+                StoreContextMut<'_, T>,
+                CallerInstance,
+                Params,
+            ) -> Box<dyn Future<Output = Result<Return>> + Send + '_>
+            + Send
+            + Sync
+            + 'static,
+        Params: ComponentNamedList + Lift + 'static,
+        Return: ComponentNamedList + Lower + 'static,
+    {
+        assert!(
+            self.engine.config().async_support,
+            "cannot use `func_wrap_async` without enabling async support in the config"
+        );
+        let ff = move |store: StoreContextMut<'_, T>,
+                       caller_instance: CallerInstance,
+                       params: Params|
+              -> Result<Return> {
+            store.block_on(|store| f(store, caller_instance, params).into())?
+        };
+        self.func_wrap_with_caller(name, ff)
     }
 
     /// Defines a new host-provided async function into this [`LinkerInstance`].
