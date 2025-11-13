@@ -208,7 +208,7 @@ pub struct Source {
 }
 
 impl Source {
-    /// Associated with host imports.
+    /// Associates imports with the host as the source.
     pub fn host() -> Source {
         Source {
             path: "host".to_string(),

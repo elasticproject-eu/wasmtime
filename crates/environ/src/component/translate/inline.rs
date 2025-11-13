@@ -502,7 +502,7 @@ impl<'a> Inliner<'a> {
         }
         let mut count = 0;
         for (_, func) in comp_exports {
-            let source = self.core_def_to_sources.get(&func).expect("The component should be completely parsed by now and all the exported core definitions established.").clone();
+            let source = self.core_def_to_sources[&func].clone();
             fr.instance_structure
                 .component_exports
                 .insert(count, source);

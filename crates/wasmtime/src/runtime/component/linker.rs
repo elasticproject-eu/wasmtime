@@ -19,10 +19,13 @@ use wasmtime_environ::component::{NameMap, NameMapIntern};
 
 #[cfg(feature = "caller")]
 #[derive(Debug)]
-/// Used as a type for passing the caller_instance through the host function closures
-/// See [`LinkerInstance::func_wrap_with_caller`]
+/// Identifies the runtime instance from which a host function call originated
+/// Because nested components are flattened during compilation, this requires identifying both
+/// the top-level instance within the store and the runtime instance within it.
 pub struct CallerInstance {
+    /// The top-level instance within the store
     pub(crate) instance: Instance,
+    /// The runtime component instance index within the top-level component instance
     pub(crate) caller: u32,
 }
 
