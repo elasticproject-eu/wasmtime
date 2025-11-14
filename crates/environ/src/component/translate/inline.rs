@@ -465,9 +465,9 @@ impl<'a> Inliner<'a> {
                     let instance_ty = frame.instance_ty;
                     let (mut fr, snapshot) = frames.pop().unwrap();
 
-                    // When we have finished processing a frame,
-                    // we track components that instantiates core modules
-                    // inside the component structure.
+                    // When we have finished processing a frame, we add the corresponding
+                    // instance structure to the instantiation graph.
+                    // We only track components that instantiate core modules.
                     if fr.instance_structure.core_instances.len() != 0 {
                         self.add_component_exports(types, &exports, &mut fr)?;
 
@@ -490,6 +490,7 @@ impl<'a> Inliner<'a> {
         }
     }
 
+    //TODO: Add some docs here
     fn add_component_exports(
         &mut self,
         types: &mut ComponentTypesBuilder,
@@ -1330,6 +1331,7 @@ impl<'a> Inliner<'a> {
                                 _ => module.to_string(),
                             };
 
+                            //TODO: Docs here
                             core_imports.insert(count, name.clone());
                             sources.insert(
                                 count,
@@ -1384,7 +1386,7 @@ impl<'a> Inliner<'a> {
                             self.core_def_to_sources.insert(
                                 core_def.clone(),
                                 Source {
-                                    path: frame.instance_structure.path.clone().clone(),
+                                    path: frame.instance_structure.path.clone(),
                                     core_instance,
                                     export: count,
                                 },

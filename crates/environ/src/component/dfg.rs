@@ -182,7 +182,7 @@ impl RootComponentInstanceStructure {
     }
 }
 
-/// Part of the instantiation graph, it represents a core instance a component instance
+/// Part of the instantiation graph, it represents a core instance of a component instance
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct CoreInstanceStructure {
     /// Hex encoded sha256 digest of the core module binary.
@@ -746,7 +746,7 @@ impl ComponentDfg {
         Ok(ComponentTranslation {
             trampolines: linearize.trampoline_defs,
             component: Component {
-                component_structure: linearize.dfg.instantiation_graph.clone(),
+                instantiation_graph: linearize.dfg.instantiation_graph.clone(),
                 exports,
                 export_items,
                 initializers: linearize.initializers,

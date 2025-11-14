@@ -73,7 +73,7 @@ pub struct ComponentTranslation {
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Component {
     /// Component Structure keeping track of the runtime instances dependency graph
-    pub component_structure: dfg::RootComponentInstanceStructure,
+    pub instantiation_graph: dfg::RootComponentInstanceStructure,
 
     /// A list of typed values that this component imports.
     ///
